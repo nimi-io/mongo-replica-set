@@ -1,25 +1,16 @@
-# Docker and MongoDB files
-.DS_Store
+# MongoDB and logs
 *.log
+data/
 
-# Node modules (if using Node.js drivers)
-node_modules/
-npm-debug.log*
-
-# Python cache (if using Python drivers)
-__pycache__/
-*.py[cod]
-*$py.class
+# OS generated files
+.DS_Store
+Thumbs.db
 
 # IDE files
 .vscode/
 .idea/
 *.swp
 *.swo
-
-# OS generated files
-Thumbs.db
-ehthumbs.db
 
 # Temporary files
 *.tmp
