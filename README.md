@@ -1,8 +1,8 @@
 # MongoDB Replica Set
 
-This repository contains a complete MongoDB replica set setup using Docker Compose with 3 MongoDB instances.
+This repository contains a complete MongoDB replica set setup using Docker Compose with 3 MongoDB instances, with support for both local development and Railway cloud deployment.
 
-## Quick Start
+## Quick Start (Local Development)
 
 1. **Start the replica set:**
    ```bash
@@ -89,8 +89,25 @@ db.testcollection.insertOne({name: "test", timestamp: new Date()})
 // The data should be available on all secondary nodes
 ```
 
+## Railway Deployment
+
+This project can be deployed to Railway cloud platform. See [RAILWAY.md](RAILWAY.md) for detailed deployment instructions.
+
+### Quick Railway Setup
+
+1. **Push to GitHub and connect to Railway**
+2. **Use the Railway-specific Dockerfile**:
+   ```bash
+   cp Dockerfile.railway Dockerfile
+   ```
+3. **Set environment variables in Railway dashboard**
+4. **Deploy automatically via GitHub integration**
+
+For detailed Railway deployment instructions, see [RAILWAY.md](RAILWAY.md).
+
 ## Troubleshooting
 
 - If initialization fails, wait a bit longer for all containers to be ready
 - Check container logs: `docker-compose logs <service_name>`
 - Ensure no other MongoDB instances are running on ports 27017-27019
+- For Railway deployment issues, check the [Railway deployment guide](RAILWAY.md)

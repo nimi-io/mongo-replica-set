@@ -1,0 +1,54 @@
+version: "3.8"
+
+services:
+  mongodb-primary:
+    build: .
+    environment:
+      - REPLICA_SET_MEMBER=primary
+      - MONGO_PRIMARY_HOST=mongodb-primary
+      - MONGO_SECONDARY1_HOST=mongodb-secondary1  
+      - MONGO_SECONDARY2_HOST=mongodb-secondary2
+    volumes:
+      - primary_data:/data/db
+    networks:
+      - mongo-net
+    restart: unless-stopped
+
+  mongodb-secondary1:
+    build: .
+    environment:
+      - REPLICA_SET_MEMBER=secondary
+      - MONGO_PRIMARY_HOST=mongodb-primary
+      - MONGO_SECONDARY1_HOST=mongodb-secondary1
+      - MONGO_SECONDARY2_HOST=mongodb-secondary2
+    volumes:
+      - secondary1_data:/data/db
+    networks:
+      - mongo-net
+    depends_on:
+      - mongodb-primary
+    restart: unless-stopped
+
+  mongodb-secondary2:
+    build: .
+    environment:
+      - REPLICA_SET_MEMBER=secondary
+      - MONGO_PRIMARY_HOST=mongodb-primary
+      - MONGO_SECONDARY1_HOST=mongodb-secondary1
+      - MONGO_SECONDARY2_HOST=mongodb-secondary2
+    volumes:
+      - secondary2_data:/data/db
+    networks:
+      - mongo-net
+    depends_on:
+      - mongodb-primary
+    restart: unless-stopped
+
+volumes:
+  primary_data:
+  secondary1_data:
+  secondary2_data:
+
+networks:
+  mongo-net:
+    driver: bridge
