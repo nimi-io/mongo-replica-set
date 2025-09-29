@@ -1,29 +1,32 @@
-# MongoDB Replica Set for Railway
+# MongoDB Replica Set with Docker Compose
 
-A MongoDB replica set configuration optimized for Railway deployment.
+A simple and reliable MongoDB replica set setup using Docker Compose for local development and testing.
 
-## Quick Deploy
+## Quick Start
 
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/your-template-id)
+1. **Clone and setup:**
+   ```bash
+   git clone <repository-url>
+   cd mongo-replica-set
+   npm install
+   ```
+
+2. **Start the replica set:**
+   ```bash
+   ./setup.sh
+   ```
+
+3. **Test the connection:**
+   ```bash
+   npm start
+   ```
 
 ## Files Overview
 
-- `Dockerfile` - MongoDB container configuration
-- `railway.json` - Railway deployment configuration  
-- `init-replica-set.js` - MongoDB initialization script
-- `RAILWAY_DEPLOYMENT.md` - Complete deployment guide
-
-## Deployment
-
-See [RAILWAY_DEPLOYMENT.md](RAILWAY_DEPLOYMENT.md) for detailed instructions on deploying a 3-node MongoDB replica set on Railway.
-
-## Environment Variables
-
-Each MongoDB instance requires:
-- `MONGO_NODE_ID` - Node identifier (0, 1, 2)
-- `MONGO_HOST` - Hostname for this instance
-- `MONGO_REPLICA_SET` - Replica set name (default: rs0)
-- `MONGO_PORT` - Port number (default: 27017)
+- `docker-compose.yml` - Docker Compose configuration for 3-node MongoDB replica set
+- `setup.sh` - Automated setup script for initializing the replica set
+- `connect.js` - Connection test script with CRUD operations
+- `package.json` - Node.js dependencies and scripts
 
 ## Architecture
 
@@ -31,8 +34,55 @@ Each MongoDB instance requires:
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   mongo1        │    │   mongo2        │    │   mongo3        │
 │   (Primary)     │◄──►│   (Secondary)   │◄──►│   (Secondary)   │
-│   Port: 27017   │    │   Port: 27017   │    │   Port: 27017   │
+│   Port: 27017   │    │   Port: 27018   │    │   Port: 27019   │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
 
-Each service runs independently on Railway with internal networking.
+The replica set consists of:
+- **mongo1**: Primary node (localhost:27017)
+- **mongo2**: Secondary node (localhost:27018)  
+- **mongo3**: Secondary node (localhost:27019)
+
+## Connection String
+
+```javascript
+mongodb://localhost:27017,localhost:27018,localhost:27019/myapp?replicaSet=rs0
+```
+
+## Available Commands
+
+- `npm start` - Test the MongoDB connection and run CRUD operations
+- `./setup.sh` - Initialize and start the MongoDB replica set
+- `docker compose up -d` - Start containers without initialization
+- `docker compose down` - Stop and remove containers
+- `docker compose down -v` - Stop containers and remove volumes (clean reset)
+
+## Troubleshooting
+
+If you encounter connection issues:
+
+1. **Ensure containers are running:**
+   ```bash
+   docker ps
+   ```
+
+2. **Check replica set status:**
+   ```bash
+   docker exec mongo1 mongosh --eval "rs.status()"
+   ```
+
+3. **Reset everything:**
+   ```bash
+   docker compose down -v
+   ./setup.sh
+   ```
+
+## Requirements
+
+- Docker and Docker Compose
+- Node.js (for testing)
+- MongoDB shell (mongosh) - included in MongoDB Docker image
+
+## License
+
+MIT

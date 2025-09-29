@@ -1,0 +1,16 @@
+{
+  "name": "mongo-replica-set",
+  "version": "1.0.0",
+  "description": "MongoDB Replica Set with Docker Compose",
+  "main": "connect.js",
+  "scripts": {
+    "start": "node connect.js",
+    "setup": "./setup.sh"
+  },
+  "dependencies": {
+    "mongoose": "^7.5.0"
+  },
+  "keywords": ["mongodb", "replica-set", "docker", "mongoose"],
+  "author": "",
+  "license": "MIT"
+}
