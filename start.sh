@@ -77,25 +77,33 @@ fi
 # Final verification
 echo ""
 echo "🧪 Running final verification..."
-if docker exec mongo1 mongosh -u admin -p password123 --authenticationDatabase admin --eval "
+VERIFICATION_OUTPUT=$(docker exec mongo1 mongosh -u admin -p password123 --authenticationDatabase admin --eval "
     const status = rs.status();
     const primary = status.members.find(m => m.stateStr === 'PRIMARY');
     const secondaries = status.members.filter(m => m.stateStr === 'SECONDARY');
     print('Primary: ' + (primary ? primary.name : 'NONE'));
     print('Secondaries: ' + secondaries.length);
-    if (!primary) { throw new Error('No primary found'); }
-" --quiet; then
-    echo "✅ Replica set verification passed!"
+    print('Total members: ' + status.members.length);
+    print('Set name: ' + status.set);
+" --quiet 2>/dev/null)
+
+if echo "$VERIFICATION_OUTPUT" | grep -q "Primary:" && echo "$VERIFICATION_OUTPUT" | grep -q "Secondaries:"; then
+    echo "$VERIFICATION_OUTPUT"
+    if echo "$VERIFICATION_OUTPUT" | grep -q "Primary: NONE"; then
+        echo "⚠️  No primary found, but replica set is configured"
+    else
+        echo "✅ Replica set verification passed!"
+    fi
 else
-    echo "⚠️  Replica set may not be fully initialized, but containers are running"
+    echo "⚠️  Could not verify replica set status, but containers are running"
 fi
 
 echo ""
 echo "🎉 MongoDB Replica Set is ready!"
 echo "📋 Connection details:"
 echo "   Connection String: mongodb://admin:password123@localhost:27017,localhost:27018,localhost:27019/?replicaSet=rs0&authSource=admin"
-echo "   Primary: localhost:27017"
-echo "   Secondary: localhost:27018, localhost:27019"
+echo "   Nodes: localhost:27017 (mongo1), localhost:27018 (mongo2), localhost:27019 (mongo3)"
+echo "   Note: Any node can be primary - MongoDB will automatically elect the primary"
 echo ""
 echo "🔧 Useful commands:"
 echo "   Check status: docker exec -it mongo1 mongosh -u admin -p password123 --authenticationDatabase admin --eval 'rs.status()' --quiet"
