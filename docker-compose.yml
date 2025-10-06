@@ -1,39 +1,91 @@
 services:
   mongo1:
-    image: mongo:6.0
+    image: mongo:7.0
     container_name: mongo1
-    hostname: mongo1
+    restart: always
     ports:
-      - "0.0.0.0:27017:27017"
-    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password123
     volumes:
       - mongo1_data:/data/db
+      - ./mongo-keyfile:/opt/keyfile/mongo-keyfile
     networks:
-      - mongo-network
+      - mongo-cluster
+    command: >
+      bash -c "
+        chmod 400 /opt/keyfile/mongo-keyfile
+        chown mongodb:mongodb /opt/keyfile/mongo-keyfile
+        exec mongod --replSet rs0 --keyFile /opt/keyfile/mongo-keyfile --bind_ip_all
+      "
+    healthcheck:
+      test: |
+        mongosh --eval "
+        try {
+          if (db.runCommand('hello').isWritablePrimary || db.runCommand('hello').secondary) {
+            quit(0)
+          } else {
+            quit(1)
+          }
+        } catch(e) {
+          try {
+            rs.initiate({
+              _id: 'rs0',
+              members: [
+                { _id: 0, host: 'mongo1:27017' },
+                { _id: 1, host: 'mongo2:27017' },
+                { _id: 2, host: 'mongo3:27017' }
+              ]
+            })
+          } catch(e) {}
+          quit(1)
+        }
+        " --quiet
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
 
   mongo2:
-    image: mongo:6.0
+    image: mongo:7.0
     container_name: mongo2
-    hostname: mongo2
+    restart: always
     ports:
-      - "0.0.0.0:27018:27017"
-    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
+      - "27018:27017"
     volumes:
       - mongo2_data:/data/db
+      - ./mongo-keyfile:/opt/keyfile/mongo-keyfile
     networks:
-      - mongo-network
+      - mongo-cluster
+    command: >
+      bash -c "
+        chmod 400 /opt/keyfile/mongo-keyfile
+        chown mongodb:mongodb /opt/keyfile/mongo-keyfile
+        exec mongod --replSet rs0 --keyFile /opt/keyfile/mongo-keyfile --bind_ip_all
+      "
+    depends_on:
+      - mongo1
 
   mongo3:
-    image: mongo:6.0
+    image: mongo:7.0
     container_name: mongo3
-    hostname: mongo3
+    restart: always
     ports:
-      - "0.0.0.0:27019:27017"
-    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
+      - "27019:27017"
     volumes:
       - mongo3_data:/data/db
+      - ./mongo-keyfile:/opt/keyfile/mongo-keyfile
     networks:
-      - mongo-network
+      - mongo-cluster
+    command: >
+      bash -c "
+        chmod 400 /opt/keyfile/mongo-keyfile
+        chown mongodb:mongodb /opt/keyfile/mongo-keyfile
+        exec mongod --replSet rs0 --keyFile /opt/keyfile/mongo-keyfile --bind_ip_all
+      "
+    depends_on:
+      - mongo1
 
 volumes:
   mongo1_data:
@@ -41,5 +93,5 @@ volumes:
   mongo3_data:
 
 networks:
-  mongo-network:
+  mongo-cluster:
     driver: bridge

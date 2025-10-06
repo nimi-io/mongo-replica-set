@@ -1,16 +1,24 @@
 {
-  "name": "mongo-replica-set",
+  "name": "mongo-replica-set-test",
   "version": "1.0.0",
-  "description": "MongoDB Replica Set with Docker Compose",
-  "main": "connect.js",
+  "description": "Test suite for MongoDB Replica Set with Change Streams",
+  "main": "test-mongodb.js",
   "scripts": {
-    "start": "node connect.js",
-    "setup": "./setup.sh"
+    "test": "node test-mongodb.js",
+    "install-deps": "npm install",
+    "change-stream": "node examples/change-stream-example.js",
+    "webhook": "node examples/webhook-example.js"
   },
   "dependencies": {
-    "mongoose": "^7.5.0"
+    "mongodb": "^6.0.0",
+    "axios": "^1.5.0"
   },
-  "keywords": ["mongodb", "replica-set", "docker", "mongoose"],
-  "author": "",
+  "keywords": [
+    "mongodb",
+    "replica-set",
+    "change-streams",
+    "docker"
+  ],
+  "author": "MongoDB Replica Set Setup",
   "license": "MIT"
 }
